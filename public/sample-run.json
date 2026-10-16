@@ -1,0 +1,22 @@
+{
+  "summary": "Intake parsed: urgent supplier follow-up before Friday board prep.",
+  "model": "sample",
+  "intake": {
+    "title": "Call supplier about short shipment SKU 4421",
+    "owner": "Warehouse lead",
+    "priority": "urgent",
+    "due_date": "Friday",
+    "notes": "Update shared tracker Maria uses; board prep dependency."
+  },
+  "trace": [
+    {
+      "tool": "extract_intake",
+      "input": { "title": "Call supplier about short shipment SKU 4421" },
+      "result": { "ok": true }
+    },
+    {
+      "tool": "validate_intake",
+      "result": { "valid": true }
+    }
+  ]
+}

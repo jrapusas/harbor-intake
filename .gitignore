@@ -1,0 +1,20 @@
+# dependencies
+node_modules
+
+# build output
+dist
+
+# secrets & local env (commit .env.example only)
+.env
+.env.*
+!.env.example
+
+# Vercel local project link
+.vercel
+
+# logs & OS
+*.log
+.DS_Store
+
+# local editor / agent history (not part of deploy)
+.specstory/
