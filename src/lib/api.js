@@ -1,5 +1,27 @@
 const demoToken = import.meta.env.VITE_DEMO_TOKEN;
 
+/** @returns {Promise<Record<string, unknown>>} */
+async function readJsonResponse(res) {
+  const text = await res.text();
+  if (!text.trim()) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    const preview = text.replace(/\s+/g, ' ').trim().slice(0, 200);
+    if (/^An error occurred/i.test(text)) {
+      throw new Error(
+        'Production API timed out or crashed (Vercel Hobby: 10s limit on /api/run). ' +
+          'Redeploy after pulling latest (single-call agent on Vercel), or use Load sample run on the call.',
+      );
+    }
+    throw new Error(
+      res.ok
+        ? `API returned non-JSON (${res.status}): ${preview}`
+        : `API error (${res.status}): ${preview}`,
+    );
+  }
+}
+
 function headers() {
   const h = { 'Content-Type': 'application/json' };
   if (demoToken) h['X-Demo-Token'] = demoToken;
@@ -13,10 +35,13 @@ export async function checkApiHealth() {
   } catch {
     throw new Error('Cannot reach API. Run npm run dev:local (UI :5173 + API :3848).');
   }
-  const data = await res.json().catch(() => ({}));
+  const data = await readJsonResponse(res);
   if (!res.ok) throw new Error(data.error || 'API health check failed');
   if (!data.has_llm_key) {
-    throw new Error('No LLM key on server. Set GEMINI_API_KEY (free tier) or DEEPSEEK_API_KEY.');
+    throw new Error(
+      data.hint ||
+        'No LLM key on server. Set GEMINI_API_KEY (free tier) or DEEPSEEK_API_KEY.',
+    );
   }
   return data;
 }
@@ -27,7 +52,7 @@ export async function runAgent(rawText) {
     headers: headers(),
     body: JSON.stringify({ rawText }),
   });
-  const data = await res.json();
+  const data = await readJsonResponse(res);
   if (!res.ok) throw new Error(data.error || 'Agent request failed');
   return data;
 }
@@ -39,7 +64,7 @@ export async function validateIntake(intake) {
       headers: headers(),
       body: JSON.stringify({ intake }),
     });
-    const data = await res.json();
+    const data = await readJsonResponse(res);
     if (res.ok) return data;
   } catch {
     /* API not running — fall back for local Vite-only dev */

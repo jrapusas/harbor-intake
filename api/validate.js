@@ -12,7 +12,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'POST only' });
   }
 
-  const { status, body } = await handleValidateRequest(req);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  return res.status(status).json(body);
+  try {
+    const { status, body } = await handleValidateRequest(req);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    return res.status(status).json(body);
+  } catch (err) {
+    console.error('POST /api/validate failed:', err);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    return res.status(500).json({ error: err?.message || 'Internal server error' });
+  }
 }
