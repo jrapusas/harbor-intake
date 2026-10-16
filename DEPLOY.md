@@ -35,7 +35,7 @@ Server routes read `process.env` in `api/*.js` (`lib/config.mjs`). **`.env` is n
 |------|----------------|--------|
 | `GEMINI_API_KEY` | **Production** + **Preview** | **Required for Run live agent** if using Gemini ([AI Studio](https://aistudio.google.com/apikey)). Checked **before** DeepSeek. Not `VITE_*`. |
 | `DEEPSEEK_API_KEY` | Production + Preview | Optional alt; used only if `GEMINI_API_KEY` is unset/empty. |
-| `HARBOR_MODEL` | Production + Preview | Optional. Default `gemini-3.8-flash` (Gemini) or `deepseek-chat` (DeepSeek). Example: `gemini-3.1-flash-lite-preview`. |
+| `HARBOR_MODEL` | Production + Preview | Optional. Default `gemini-3.1-flash-lite-preview` (Gemini) or `deepseek-chat` (DeepSeek). Override only if you need a specific model. |
 | `DEMO_TOKEN` | Production + Preview | Optional. Locks `POST /api/run` and `/api/validate` without header. |
 | `VITE_DEMO_TOKEN` | Production + Preview | **Required if `DEMO_TOKEN` is set** — same value; baked into the client at **build** time. |
 | `VITE_SUPABASE_URL` | — | **Cheff URL: omit** |
