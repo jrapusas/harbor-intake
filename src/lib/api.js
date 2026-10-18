@@ -11,7 +11,7 @@ async function readJsonResponse(res) {
     if (/^An error occurred/i.test(text)) {
       throw new Error(
         'Production API timed out or crashed (Vercel Hobby: 10s limit on /api/run). ' +
-          'Redeploy after pulling latest (single-call agent on Vercel), or use Load sample run on the call.',
+          'Redeploy after pulling latest (single-call agent on Vercel), or click Use demo data on the call.',
       );
     }
     throw new Error(
@@ -36,7 +36,11 @@ export async function checkApiHealth() {
     throw new Error('Cannot reach API. Run npm run dev:local (UI :5173 + API :3848).');
   }
   const data = await readJsonResponse(res);
-  if (!res.ok) throw new Error(data.error || 'API health check failed');
+  if (!res.ok) {
+    throw new Error(
+      data.error || 'Cannot reach API. Run npm run dev:local (UI :5173 + API :3848).',
+    );
+  }
   if (!data.has_llm_key) {
     throw new Error(
       data.hint ||

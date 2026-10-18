@@ -30,7 +30,7 @@ cp .env.example .env
 npm run dev
 ```
 
-Open http://localhost:5173 → **Open agentic demo** → **Load sample run** → edit owner → **Agent re-validate** → **Save**.
+Open http://localhost:5173 → **Start an intake** → **Use demo data** → edit owner → **Re-check after my edits** → **Save task**.
 
 Re-validate works in the browser if the API is not running. **Run live agent** needs the API (below).
 
@@ -75,10 +75,10 @@ See [DEPLOY.md](./DEPLOY.md). Vercel root: **repo root** (`.`).
 
 ## 2-minute demo script (top 7 agentic patterns)
 
-1. Landing → **Open agentic demo**
-2. **Load sample run** on **★ Agentic showcase** — checklist + **Agent steps** timeline
+1. Landing → **Start an intake**
+2. **Use demo data** on **Monday triage** — open **Demo: 7 patterns**, then **What the agent did**
 3. Point at split tasks, route banner, validate retry in timeline
-4. Edit **owner** → **Agent re-validate** (checks off #7) → **Save to list** → **Export CSV**
+4. Edit **owner** → **Re-check after my edits** (checks off #7) → **Save task** → **Export CSV**
 5. Say: *“Same product shape as your Vue/React + Supabase + DeepSeek builds; I’d match the next portco’s stack.”*
 
 ## Cheff folder

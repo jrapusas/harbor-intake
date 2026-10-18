@@ -3,7 +3,7 @@
 export const SAMPLES = [
   {
     id: 'agentic-showcase',
-    label: '★ Agentic showcase (top 7)',
+    label: 'Monday triage · three tasks',
     paste: `PORT OPS — Monday triage (forwarded thread)
 
 1) CUSTOMS: BOL mismatch container HLCU-9034412 — @David Nguyen loop forwarder, release by Tuesday EOD.

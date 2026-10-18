@@ -17,7 +17,7 @@ export default function AgentTimeline({ trace, showRaw, onToggleRaw }) {
   return (
     <div className="agent-timeline">
       <div className="timeline-head">
-        <h3>Agent steps</h3>
+        <h3>What the agent did</h3>
         <button type="button" className="link" onClick={onToggleRaw}>
           {showRaw ? 'Hide JSON' : 'Raw JSON'}
         </button>

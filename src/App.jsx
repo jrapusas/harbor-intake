@@ -8,6 +8,14 @@ import { listIntakes, saveIntake, storageMode } from './lib/storage.js';
 
 const defaultSample = getSample(DEFAULT_SAMPLE_ID);
 
+const FIELD_LABELS = {
+  title: 'Title',
+  owner: 'Owner',
+  priority: 'Priority',
+  due_date: 'Due',
+  notes: 'Notes',
+};
+
 const emptyIntake = () => ({
   title: '',
   owner: '',
@@ -33,6 +41,7 @@ export default function App() {
   const [splits, setSplits] = useState([]);
   const [humanRecheckDone, setHumanRecheckDone] = useState(false);
   const [agentFilled, setAgentFilled] = useState(false);
+  const [selectedSplit, setSelectedSplit] = useState(0);
 
   const refreshList = useCallback(async () => {
     try {
@@ -50,6 +59,7 @@ export default function App() {
     setSplits([]);
     setHumanRecheckDone(false);
     setAgentFilled(false);
+    setSelectedSplit(0);
     setIntake(emptyIntake());
     setShowRawTrace(false);
   }
@@ -59,7 +69,9 @@ export default function App() {
     setSummary(data.summary || '');
     setTrace(data.trace || []);
     setClassification(data.classification || null);
-    setSplits(data.splits || []);
+    const nextSplits = data.splits || [];
+    setSplits(nextSplits);
+    setSelectedSplit(0);
     setAgentFilled(Boolean(data.intake?.title));
     setHumanRecheckDone(false);
   }
@@ -84,7 +96,7 @@ export default function App() {
           health.model && health.provider
             ? `${health.provider} · ${health.model}`
             : health.model || health.provider || 'configured model';
-        setRunStatus(`Running live agent (${modelLabel})…`);
+        setRunStatus(`Processing note (${modelLabel})…`);
         data = await runAgent(text);
       } else {
         data = await loadSampleRun(sampleId);
@@ -128,8 +140,10 @@ export default function App() {
     }
   }
 
-  function selectSplit(row) {
+  function selectSplit(row, index) {
+    setSelectedSplit(index);
     setIntake({ ...emptyIntake(), ...row });
+    setHumanRecheckDone(false);
   }
 
   const demonstrated = useMemo(
@@ -169,13 +183,14 @@ export default function App() {
             <p className="eyebrow">Portco ops · logistics / WMS</p>
             <h1>Messy notes in. Structured tasks out.</h1>
             <p className="lede">
-              Browser SaaS demo with seven agentic patterns: tool loop, structured fields, validate/retry, roster lookup,
-              split tasks, routing, and human re-check — not a chat sidebar.
+              Paste a warehouse email. Harbor turns it into tasks with owners, due dates, and a queue. You edit, then save.
+            </p>
+            <p className="lede">
+              Agent runs the tools in the product: split, roster lookup, route, validate, then a human check before save.
             </p>
             <ul className="bullets">
-              <li>Start with <strong>Agentic showcase</strong> → Load sample run ($0)</li>
-              <li>Edit a field → <strong>Agent re-validate</strong> to complete #7</li>
-              <li>Interview URL: Vercel + localStorage (no DB pause)</li>
+              <li><strong>Use demo data</strong> walks a Monday triage with no API cost.</li>
+              <li>Pick a task, change a field, then <strong>Re-check after my edits</strong>.</li>
             </ul>
             <button
               type="button"
@@ -187,150 +202,166 @@ export default function App() {
                 setScreen('intake');
               }}
             >
-              Open agentic demo
+              Start an intake
             </button>
           </section>
         )}
 
         {screen === 'intake' && (
-          <section className="panel">
-            <h2>New intake</h2>
-            {showcaseActive && !trace.length && (
-              <p className="hint">
-                Click <strong>Load sample run</strong> to walk through all seven patterns. Then edit owner and hit{' '}
-                <strong>Agent re-validate</strong>.
-              </p>
-            )}
-            <label className="field">
-              <span>Example note (fills paste below)</span>
-              <select
-                value={sampleId}
-                onChange={(e) => {
-                  const id = e.target.value;
-                  setSampleId(id);
-                  setRawText(getSample(id).paste);
+          <section className="panel intake-layout">
+            <div className="source-pane">
+              <h2>Triage a note</h2>
+              <p className="hint">Paste stays here. Tasks land on the right.</p>
+              <label className="field">
+                <span>Example note</span>
+                <select
+                  value={sampleId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    setSampleId(id);
+                    setRawText(getSample(id).paste);
+                    resetRunState();
+                  }}
+                >
+                  {SAMPLES.map((s) => (
+                    <option key={s.id} value={s.id}>{s.label}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>Email or warehouse note</span>
+                <textarea
+                  rows={12}
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  placeholder={defaultSample.paste}
+                />
+              </label>
+              <button
+                type="button"
+                className="ghost sample-fill"
+                onClick={() => {
+                  setRawText(getSample(sampleId).paste);
                   resetRunState();
                 }}
               >
-                {SAMPLES.map((s) => (
-                  <option key={s.id} value={s.id}>{s.label}</option>
-                ))}
-              </select>
-            </label>
-            <label className="field">
-              <span>Paste email or warehouse note</span>
-              <textarea
-                rows={6}
-                value={rawText}
-                onChange={(e) => setRawText(e.target.value)}
-                placeholder={defaultSample.paste}
-              />
-            </label>
-            <button
-              type="button"
-              className="ghost sample-fill"
-              onClick={() => {
-                setRawText(getSample(sampleId).paste);
-                resetRunState();
-              }}
-            >
-              Use example text
-            </button>
-            <div className="row">
-              <button type="button" className="primary" disabled={busy} onClick={() => handleRun(true)}>
-                Run live agent
+                Fill from example
               </button>
-              <button type="button" className="ghost" disabled={busy} onClick={() => handleRun(false)}>
-                Load sample run
-              </button>
+              <div className="row">
+                <button type="button" className="primary" disabled={busy} onClick={() => handleRun(true)}>
+                  Process note
+                </button>
+                <button type="button" className="ghost" disabled={busy} onClick={() => handleRun(false)}>
+                  Use demo data
+                </button>
+              </div>
+              <p className="hint">Demo data is free. Process note calls the model.</p>
+              {runStatus && (
+                <p className="run-status" role="status" aria-live="polite">
+                  {runStatus}
+                </p>
+              )}
+              {error && <p className="error">{error}</p>}
             </div>
-            {runStatus && (
-              <p className="run-status" role="status" aria-live="polite">
-                {runStatus}
-              </p>
-            )}
-            {error && <p className="error">{error}</p>}
-            {summary && <p className="summary">{summary}</p>}
 
-            {trace.length > 0 && (
-              <>
-                <FeatureChecklist demonstrated={demonstrated} />
+            <div className="work-pane">
+              {!intake.title && !summary && (
+                <p className="muted empty-work">Tasks show up here after you process the note.</p>
+              )}
+              {summary && <p className="summary">{summary}</p>}
+
+              {classification?.category && (
+                <div className="route-banner">
+                  <span className="tag">{classification.category}</span>
+                  <span>Queue: {classification.queue}</span>
+                </div>
+              )}
+
+              {splits.length > 1 && (
+                <div className="split-panel">
+                  <h3>Tasks ({splits.length})</h3>
+                  <p className="muted">Pick one to edit and save.</p>
+                  <ul className="split-list">
+                    {splits.map((row, i) => (
+                      <li key={i}>
+                        <button
+                          type="button"
+                          className={`ghost split-card${i === selectedSplit ? ' selected' : ''}`}
+                          aria-pressed={i === selectedSplit}
+                          onClick={() => selectSplit(row, i)}
+                        >
+                          <span className="split-card-top">
+                            <strong>{row.title}</strong>
+                            <span className={`tag ${row.priority}`}>{row.priority}</span>
+                          </span>
+                          <span>{row.owner} · due {row.due_date}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {(intake.title || intake.owner) && (
+                <>
+                  <h3 className="editing-title">Editing: {intake.title || 'Untitled task'}</h3>
+                  <div className={`grid ${agentFilled ? 'agent-filled' : ''}`}>
+                    {Object.keys(FIELD_LABELS).map((key) => (
+                      <label key={key} className="field">
+                        <span>{FIELD_LABELS[key]}</span>
+                        {key === 'priority' ? (
+                          <select
+                            value={intake.priority}
+                            onChange={(e) => setIntake({ ...intake, priority: e.target.value })}
+                          >
+                            {['low', 'medium', 'high', 'urgent'].map((p) => (
+                              <option key={p} value={p}>{p}</option>
+                            ))}
+                          </select>
+                        ) : key === 'notes' ? (
+                          <textarea
+                            rows={3}
+                            value={intake[key]}
+                            onChange={(e) => setIntake({ ...intake, [key]: e.target.value })}
+                          />
+                        ) : (
+                          <input
+                            value={intake[key]}
+                            onChange={(e) => setIntake({ ...intake, [key]: e.target.value })}
+                          />
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {intake.title && (
+                <div className="row">
+                  <button type="button" className="primary" disabled={busy} onClick={handleSave}>
+                    Save task
+                  </button>
+                  <button type="button" className="ghost" disabled={busy} onClick={handleRevalidate}>
+                    Re-check after my edits
+                  </button>
+                </div>
+              )}
+
+              {showcaseActive && trace.length > 0 && (
+                <details className="demo-patterns">
+                  <summary>Demo: 7 patterns</summary>
+                  <FeatureChecklist demonstrated={demonstrated} />
+                </details>
+              )}
+
+              {trace.length > 0 && (
                 <AgentTimeline
                   trace={trace}
                   showRaw={showRawTrace}
                   onToggleRaw={() => setShowRawTrace((v) => !v)}
                 />
-              </>
-            )}
-
-            {classification?.category && (
-              <div className="route-banner">
-                <span className="tag">{classification.category}</span>
-                <span>Queue: {classification.queue}</span>
-              </div>
-            )}
-
-            {splits.length > 1 && (
-              <div className="split-panel">
-                <h3>Split tasks ({splits.length})</h3>
-                <p className="muted">Agent found multiple action items — pick one to edit and save.</p>
-                <ul className="split-list">
-                  {splits.map((row, i) => (
-                    <li key={i}>
-                      <button type="button" className="ghost split-card" onClick={() => selectSplit(row)}>
-                        <strong>{row.title}</strong>
-                        <span>{row.owner} · {row.priority}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {(intake.title || intake.owner) && (
-              <>
-                <p className="form-hint">Structured output — fields filled by agent tools. Edit before save.</p>
-                <div className={`grid ${agentFilled ? 'agent-filled' : ''}`}>
-                  {['title', 'owner', 'priority', 'due_date', 'notes'].map((key) => (
-                    <label key={key} className="field">
-                      <span>{key.replace('_', ' ')}</span>
-                      {key === 'priority' ? (
-                        <select
-                          value={intake.priority}
-                          onChange={(e) => setIntake({ ...intake, priority: e.target.value })}
-                        >
-                          {['low', 'medium', 'high', 'urgent'].map((p) => (
-                            <option key={p} value={p}>{p}</option>
-                          ))}
-                        </select>
-                      ) : key === 'notes' ? (
-                        <textarea
-                          rows={3}
-                          value={intake[key]}
-                          onChange={(e) => setIntake({ ...intake, [key]: e.target.value })}
-                        />
-                      ) : (
-                        <input
-                          value={intake[key]}
-                          onChange={(e) => setIntake({ ...intake, [key]: e.target.value })}
-                        />
-                      )}
-                    </label>
-                  ))}
-                </div>
-              </>
-            )}
-
-            {intake.title && (
-              <div className="row">
-                <button type="button" className="primary" disabled={busy} onClick={handleSave}>
-                  Save to list
-                </button>
-                <button type="button" className="ghost" disabled={busy} onClick={handleRevalidate}>
-                  Agent re-validate
-                </button>
-              </div>
-            )}
+              )}
+            </div>
           </section>
         )}
 
