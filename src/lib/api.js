@@ -1,3 +1,5 @@
+import { validateIntakeLocal } from './validateLocal.js';
+
 const demoToken = import.meta.env.VITE_DEMO_TOKEN;
 
 /** @returns {Promise<Record<string, unknown>>} */
@@ -73,7 +75,6 @@ export async function validateIntake(intake) {
   } catch {
     /* API not running — fall back for local Vite-only dev */
   }
-  const { validateIntakeLocal } = await import('./validateLocal.js');
   return validateIntakeLocal(intake);
 }
 

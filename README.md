@@ -30,9 +30,9 @@ cp .env.example .env
 npm run dev
 ```
 
-Open http://localhost:5173 → **Start an intake** → **Use demo data** → edit owner → **Re-check after my edits** → **Save task**.
+Open http://localhost:5173 → **Use demo data** → edit owner → **Re-check task** → **Save task**.
 
-Re-validate works in the browser if the API is not running. **Run live agent** needs the API (below).
+Re-check works in the browser if the API is not running. **Process note** needs the API (below).
 
 ### UI + API (live agent)
 
@@ -40,7 +40,7 @@ Re-validate works in the browser if the API is not running. **Run live agent** n
 npm run dev:local
 ```
 
-Same as two terminals (`dev:api` on :3848 + `dev` on :5173). Add `GEMINI_API_KEY` or `DEEPSEEK_API_KEY` to `.env` for **Run live agent**. New AI Studio keys (`AQ.…`) use the native Gemini SDK on the server (not the OpenAI shim).
+Same as two terminals (`dev:api` on :3848 + `dev` on :5173). Add `GEMINI_API_KEY` or `DEEPSEEK_API_KEY` to `.env` for **Process note**. New AI Studio keys (`AQ.…`) use the native Gemini SDK on the server (not the OpenAI shim).
 
 Or manually:
 
@@ -75,10 +75,10 @@ See [DEPLOY.md](./DEPLOY.md). Vercel root: **repo root** (`.`).
 
 ## 2-minute demo script (top 7 agentic patterns)
 
-1. Landing → **Start an intake**
-2. **Use demo data** on **Monday triage** — seven patterns and the tool trace sit at the bottom
-3. Point at split tasks, route banner, validate retry in timeline
-4. Edit **owner** → **Re-check after my edits** (checks off #7) → **Save task** → **Export CSV**
+1. App opens on **Triage a note** with the Monday triage example
+2. **Use demo data** — three tasks on the right; seven patterns and the tool trace sit at the bottom
+3. Point at split tasks, queue, and the validate retry in the trace
+4. Edit **owner** → **Re-check task** (checks off #7) → **Save task** on each → **View saved** → **Export CSV**
 5. Say: *“Same product shape as your Vue/React + Supabase + DeepSeek builds; I’d match the next portco’s stack.”*
 
 ## Cheff folder
