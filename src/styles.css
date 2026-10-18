@@ -472,14 +472,8 @@ th {
   margin-top: 2.5rem;
 }
 
-.demo-patterns {
-  margin: 0.5rem 0 1rem;
-  font-size: 0.88rem;
-}
-
-.demo-patterns summary {
-  cursor: pointer;
-  color: var(--muted);
+.foot p {
+  margin: 0.75rem 0 0;
 }
 
 @media (max-width: 800px) {

@@ -90,13 +90,8 @@ export default function App() {
       if (!rawText.trim()) setRawText(text);
       let data;
       if (live) {
-        setRunStatus('Connecting to API…');
-        const health = await checkApiHealth();
-        const modelLabel =
-          health.model && health.provider
-            ? `${health.provider} · ${health.model}`
-            : health.model || health.provider || 'configured model';
-        setRunStatus(`Processing note (${modelLabel})…`);
+        setRunStatus('Reading the note…');
+        await checkApiHealth();
         data = await runAgent(text);
       } else {
         data = await loadSampleRun(sampleId);
@@ -174,7 +169,7 @@ export default function App() {
             Saved
           </button>
         </nav>
-        <span className="pill">{storageMode() === 'supabase' ? 'Supabase' : 'Local save'}</span>
+        <span className="pill">{storageMode() === 'supabase' ? 'Supabase' : 'On this browser'}</span>
       </header>
 
       <main>
@@ -185,12 +180,9 @@ export default function App() {
             <p className="lede">
               Paste a warehouse email. Harbor turns it into tasks with owners, due dates, and a queue. You edit, then save.
             </p>
-            <p className="lede">
-              Agent runs the tools in the product: split, roster lookup, route, validate, then a human check before save.
-            </p>
             <ul className="bullets">
-              <li><strong>Use demo data</strong> walks a Monday triage with no API cost.</li>
-              <li>Pick a task, change a field, then <strong>Re-check after my edits</strong>.</li>
+              <li>Paste a note, or pick an example.</li>
+              <li>Process it, fix a field, then save the task.</li>
             </ul>
             <button
               type="button"
@@ -255,7 +247,6 @@ export default function App() {
                   Use demo data
                 </button>
               </div>
-              <p className="hint">Demo data is free. Process note calls the model.</p>
               {runStatus && (
                 <p className="run-status" role="status" aria-live="polite">
                   {runStatus}
@@ -268,8 +259,6 @@ export default function App() {
               {!intake.title && !summary && (
                 <p className="muted empty-work">Tasks show up here after you process the note.</p>
               )}
-              {summary && <p className="summary">{summary}</p>}
-
               {classification?.category && (
                 <div className="route-banner">
                   <span className="tag">{classification.category}</span>
@@ -347,20 +336,6 @@ export default function App() {
                 </div>
               )}
 
-              {showcaseActive && trace.length > 0 && (
-                <details className="demo-patterns">
-                  <summary>Demo: 7 patterns</summary>
-                  <FeatureChecklist demonstrated={demonstrated} />
-                </details>
-              )}
-
-              {trace.length > 0 && (
-                <AgentTimeline
-                  trace={trace}
-                  showRaw={showRawTrace}
-                  onToggleRaw={() => setShowRawTrace((v) => !v)}
-                />
-              )}
             </div>
           </section>
         )}
@@ -368,13 +343,13 @@ export default function App() {
         {screen === 'list' && (
           <section className="panel">
             <div className="row spread">
-              <h2>Saved intakes</h2>
+              <h2>Saved tasks</h2>
               <button type="button" className="ghost" disabled={!rows.length} onClick={() => exportCsv(rows)}>
                 Export CSV
               </button>
             </div>
             {listError && <p className="error">{listError}</p>}
-            {!rows.length && <p className="muted">No rows yet. Run an intake and save.</p>}
+            {!rows.length && <p className="muted">No tasks yet. Process a note and save.</p>}
             {rows.length > 0 && (
               <table>
                 <thead>
@@ -404,7 +379,23 @@ export default function App() {
       </main>
 
       <footer className="foot">
-        Demo stack: React (Vite) · localStorage on shared link · agent tools on Vercel serverless. Portco stack may differ.
+        <p>
+          The agent splits the note, looks up owners, routes a queue, validates, then waits for a human check before
+          save. Use demo data is free. Process note calls the model.
+        </p>
+        <p>
+          React app, save in this browser on the shared link, agent tools on the server. A portco build can use the
+          same shape on Vue or React with Supabase.
+        </p>
+        {summary && <p className="summary">{summary}</p>}
+        {showcaseActive && trace.length > 0 && <FeatureChecklist demonstrated={demonstrated} />}
+        {trace.length > 0 && (
+          <AgentTimeline
+            trace={trace}
+            showRaw={showRawTrace}
+            onToggleRaw={() => setShowRawTrace((v) => !v)}
+          />
+        )}
       </footer>
     </div>
   );

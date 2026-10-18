@@ -76,7 +76,7 @@ See [DEPLOY.md](./DEPLOY.md). Vercel root: **repo root** (`.`).
 ## 2-minute demo script (top 7 agentic patterns)
 
 1. Landing → **Start an intake**
-2. **Use demo data** on **Monday triage** — open **Demo: 7 patterns**, then **What the agent did**
+2. **Use demo data** on **Monday triage** — seven patterns and the tool trace sit at the bottom
 3. Point at split tasks, route banner, validate retry in timeline
 4. Edit **owner** → **Re-check after my edits** (checks off #7) → **Save task** → **Export CSV**
 5. Say: *“Same product shape as your Vue/React + Supabase + DeepSeek builds; I’d match the next portco’s stack.”*
